@@ -14,6 +14,15 @@ proc optParserTest(
 func a(kind: CmdArgKind, key, val = ""): CmdArg =
     CmdArg(kind: kind, key: key, val: val)
 
+test "seq[string] init":
+    proc takeAll(p: var OptParser): seq[CmdArg] =
+        for arg in p.getopt():
+            result.add(arg)
+    var p = OptParser.init(@["-o", "val", "arg", "--long=val"])
+    let seqResult = p.takeAll()
+    p = OptParser.init("-o val arg --long=val")
+    let strResult = p.takeAll()
+    check seqResult == strResult
 
 test "short flag":
     check:

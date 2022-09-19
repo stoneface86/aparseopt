@@ -229,40 +229,35 @@ func getToken(arg: string): Token =
     else:
         Token(kind: tkArgument)
 
-func init*(_: typedesc[OptParser],
-    cmd: sink seq[string],
-    shortFlags: set[char] = {},
-    longFlags: sink seq[string] = @[]
-): OptParser =
-    ## Convenience overload taking a seq of arguments instead of a command line
-    ## string.
-    _(
-        input: cmd,
-        shortFlags: shortFlags,
-        longFlags: longFlags.toCritBitTree
-    )
 
 proc init*(_: typedesc[OptParser],
-    cmd: sink string,
+    cmd: sink string or sink seq[string],
     shortFlags: set[char] = {},
     longFlags: sink seq[string] = @[]
 ): OptParser =
     ## Initializes an OptParser.
     ## 
-    ## The parser's input is initialized to the result of `parseCmdLine(cmd)`
-    ## if cmd was not empty. Otherwise if `cmd` was empty, then the real
-    ## command line as provided by the `os` module is retrieved instead.
+    ## You can pass a seq of arguments or a command line string for the parser's
+    ## input. If you pass an empty sequence or an empty string, then the real
+    ## command line as provided by the `os` module is used instead. For a
+    ## sequence of arguments, the input is set to this sequence. For a 
+    ## command line string, the input is given the result of `parseCmdLine(cmd)`
     ## 
     ## `shortFlags` and `longFlags` can be specified if you want the parser to
     ## recognize flag arguments.
-    ## 
-    _.init(
-        block:
-            if cmd.len == 0:
-                commandLineParams()
+    ##
+    template getInput(): seq[string] =
+        if cmd.len == 0:
+            commandLineParams()
+        else:
+            when cmd is seq[string]:
+                cmd
             else:
                 cmd.parseCmdLine()
-        , shortFlags, longFlags
+    _(
+        input: getInput(),
+        shortFlags: shortFlags,
+        longFlags: longFlags.toCritBitTree
     )
 
 func pos*(p: OptParser): int =
