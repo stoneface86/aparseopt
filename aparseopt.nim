@@ -284,8 +284,8 @@ template hasInput(p: OptParser): bool =
 template advance(p: var OptParser): untyped =
     inc p.pos
 
-template inputAtPos(p: var OptParser): string =
-    p.input[p.pos]
+template inputAtPos(p: var OptParser): ptr string =
+    p.input[p.pos].addr
 
 proc takeArgument(p: var OptParser) =
     p.current.kind = cakArgument
@@ -296,9 +296,9 @@ proc takeArgument(p: var OptParser) =
 proc takeOptionArgument(p: var OptParser) =
     if p.hasInput():
         let next = p.inputAtPos()
-        let nexttoken = next.getToken()
+        let nexttoken = next[].getToken()
         if nexttoken.kind == tkArgument:
-            p.current.val = next
+            p.current.val = next[]
             p.advance()
 
 proc setKeyToChar(p: var OptParser, ch: char) =
@@ -321,7 +321,7 @@ proc handleShortFlags(p: var OptParser, arg: string) =
 proc nextImpl(p: var OptParser) =
     let curr = p.inputAtPos()
     if p.shortFlagPos == 0:
-        let token = curr.getToken
+        let token = curr[].getToken
         case token.kind
         of tkShortFlagOrOption:
             p.setKeyToChar(token.shortname)
@@ -335,7 +335,7 @@ proc nextImpl(p: var OptParser) =
         of tkShortFlagsOrOption:
             if token.firstShortname in p.shortFlags:
                 p.beginShortFlags()
-                p.handleShortFlags(curr)
+                p.handleShortFlags(curr[])
             else:
                 p.setKeyToChar(token.firstShortname)
                 p.current.kind = cakShortOption
@@ -368,7 +368,7 @@ proc nextImpl(p: var OptParser) =
         of tkArgument:
             p.takeArgument()
     else:
-        p.handleShortFlags(curr)
+        p.handleShortFlags(curr[])
 
 func hasNext*(p: OptParser): bool =
     ## Returns `true` if `next<#next,OptParser>`_ will produce a new `CmdArg<#CmdArg>`_
