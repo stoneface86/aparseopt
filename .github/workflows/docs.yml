@@ -1,0 +1,40 @@
+
+name: [push] [main]
+on:
+  push:
+    branches:
+      - main
+    tags-ignore: '**'
+    paths:
+      - 'aparseopt.nim'
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v2
+
+      - name: Setup Nim
+        with:
+          nim-version: stable
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Build Docs
+        run: nimble docs
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v1
+        with:
+          path: 'htmldocs'
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v1
