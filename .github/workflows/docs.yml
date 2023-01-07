@@ -23,6 +23,7 @@ jobs:
         uses: actions/configure-pages@v2
 
       - name: Setup Nim
+        uses: jiro4989/setup-nim-action@v1
         with:
           nim-version: stable
           repo-token: ${{ secrets.GITHUB_TOKEN }}
