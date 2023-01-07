@@ -1,5 +1,5 @@
 
-name: [push] [main]
+name: '[push] [main] Docs'
 on:
   push:
     branches:
