@@ -1,5 +1,5 @@
 
-version         = "0.0.1"
+version         = "0.1.0"
 author          = "stoneface"
 description     = "API incompatible alternative for Nim's std/parseopt"
 license         = "MIT"

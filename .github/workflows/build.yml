@@ -1,0 +1,34 @@
+
+name: '[push] [main] Build'
+on:
+  push:
+    branches:
+      - main
+    tags-ignore: '**'
+    paths:
+      - 'aparseopt.nim'
+      - 'aparseopt.nimble'
+      - 'tests/**'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        nim-version: ['stable', 'devel']
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: jiro4989/setup-nim-action@v1
+        with:
+          nim-version: ${{ matrix.nim-version }}
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Check nimble package
+        run: nimble check
+
+      - name: Test
+        run: |
+          nimble tester
+          bin/tester
